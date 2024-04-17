@@ -1,67 +1,66 @@
 $(document).ready(function(){
-    console.log("Document ready!");
+    // Initialize modal
+    $('.modal').modal();
 
-    $('.materialboxed').materialbox();
+    // Click event for "click me" button
     $('#clickMe').click(function() {
-        alert("Thanks for clicking me. Hope you have a nice day!");
+        $('#modal1').modal('open');
     });
 
-    const cardList = [
-        {
-            title: "Guitar 1",
-            image: "images/Guitar.jpg",
-            link: "About Guitar 2",
-            description: "The Gibson Les Paul was first made in 1952 and is still considered one of the best musical instrument created"
-        },
-        {
-            title: "Guitar 2",
-            image: "images/Guitar.jpg",
-            link: "About Guitar 3",
-            description: "The Gibson Les Paul was first made in 1952 and is still considered one of the best musical instrument created"
-        },
-        {
-            title: "Guitar 3",
-            image: "images/Guitar.jpg",
-            link: "About Guitar 3",
-            description: "The Gibson Les Paul was first made in 1952 and is still considered one of the best musical instrument created"
-        }
-    ];
+    // Form submission handler
+    $('#card-form').submit(function(event) {
+        event.preventDefault();
 
-    const addCards = (items) => {
-        console.log("Adding cards...");
-        items.forEach(item => {
-            let itemToAppend = `
-                <div class="col s4 center-align">
-                    <div class="card medium">
-                        <div class="card-image waves-effect waves-block waves-light">
-                            <img class="activator" src="${item.image}">
-                        </div>
-                        <div class="card-content">
-                            <span class="card-title activator grey-text text-darken-4">${item.title}<i class="material-icons right">more</i></span>
-                            <p><a href="#">${item.link}</a></p>
-                        </div>
-                        <div class="card-reveal">
-                            <span class="card-title grey-text text-darken-4">${item.title}<i class="material-icons right">close</i></span>
-                            <p class="card-text">${item.description}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
-            $("#card-section").append(itemToAppend);
+        // Get form data
+        const formData = $(this).serializeArray();
+
+        // Convert form data to object
+        const cardData = {};
+        formData.forEach(function(field) {
+            cardData[field.name] = field.value;
         });
-    };
 
-    $(document).on('click', '#formSubmit', function() {
-        console.log("Form submit button clicked!");
-        let formData = {};
-        formData.first_name = $('#first_name').val();
-        formData.last_name = $('#last_name').val();
-        formData.password = $('#password').val();
-        formData.email = $('#email').val();
-        console.log("Form Data Submitted:", formData);
+        // Submit card data to server
+        $.post('/api/cards', cardData)
+            .done(function(response) {
+                console.log(response);
+                M.toast({html: 'Card added successfully', classes: 'rounded green'});
+                $('#card-form')[0].reset(); // Reset form
+            })
+            .fail(function(err) {
+                console.error('Error adding card:', err);
+                M.toast({html: 'Failed to add card', classes: 'rounded red'});
+            });
     });
 
-    addCards(cardList);
-    $('#modal1').modal();
-    $('#modal1').modal('open'); // Changed this line
+    // Fetch and display cards
+    function fetchCards() {
+        $.get('/api/cards')
+            .done(function(cards) {
+                console.log(cards);
+                $('#card-section').empty(); // Clear existing cards
+                cards.forEach(function(card) {
+                    const cardHtml = `
+                        <div class="card">
+                            <div class="card-image">
+                                <img src="${card.image}" alt="${card.title}">
+                                <span class="card-title">${card.title}</span>
+                            </div>
+                            <div class="card-content">
+                                <p>${card.description}</p>
+                            </div>
+                            <div class="card-action">
+                                <a href="${card.link}" target="_blank">Learn More</a>
+                            </div>
+                        </div>
+                    `;
+                    $('#card-section').append(cardHtml); // Append card HTML
+                });
+            })
+            .fail(function(err) {
+                console.error('Error fetching cards:', err);
+            });
+    }
+
+    fetchCards(); // Fetch cards when page loads
 });

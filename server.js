@@ -1,7 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion } = require('mongodb');
 const app = express();
-const port = 3001;
+const port = 3002;
 
 // Middleware setup
 app.use(express.static('public'));
@@ -9,7 +9,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // MongoDB Connection
-const uriy = 'mongodb+srv://s223838921:cluster1@cluster1.8rn8qjg.mongodb.net/';
+const uri = 'mongodb+srv://s223838921:cluster1@cluster1.8rn8qjg.mongodb.net/';
 const client = new MongoClient(uri, { serverApi: ServerApiVersion.latest });
 
 let collection;
